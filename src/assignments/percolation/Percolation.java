@@ -1,20 +1,21 @@
 package assignments.percolation;
 
-import edu.princeton.cs.algs4.WeightedQuickUnionUF;;
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-	private static int N;
-	private static int ufSize;
-	// true for "open", and false for "blocked"
-	private static boolean[][] grid;
-	// 0 site for the Virtual Top, (N*N-1) site for the Virtual Bottom, 
+	private int N;
+	private int ufSize;
+	// state of n-by-n sites: true for "open", and false for "blocked"
+	private boolean[][] grid;
+	// site 0 for the Virtual Top,
+	// site (N*N+1) for the Virtual Bottom, 
 	// and the rest for the grid
-	private static WeightedQuickUnionUF uf;
+	private WeightedQuickUnionUF uf;
 
 	// Create n-by-n grid, with all sites blocked
 	public Percolation(int n) {
-		if (n <= 0)
-			throw new java.lang.IllegalArgumentException();
+		if (n <= 0)  throw new java.lang.IllegalArgumentException();
+		
 		N = n;
 		ufSize = N * N + 2;
 		grid = new boolean[N + 1][N + 1];
@@ -35,13 +36,15 @@ public class Percolation {
 			uf.union(hash(i, j), ufSize - 1);
 		}
 		
-		// left, right, up, down
+		// 4 adjacents: left, right, up, down
 		final int[][] direction = { { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } };
 		for (int d = 0; d < direction.length; d++) {
-			int nextI = i + direction[d][0];
-			int nextJ = j + direction[d][1];
-			if (nextI >= 1 && nextI <= N && nextJ >= 1 && nextJ <= N && isOpen(nextI, nextJ)) {
-				uf.union(hash(i, j), hash(nextI, nextJ));
+			int adjaI = i + direction[d][0];
+			int adjaJ = j + direction[d][1];
+			if (adjaI >= 1 && adjaI <= N 
+				&& adjaJ >= 1 && adjaJ <= N 
+				&& isOpen(adjaI, adjaJ)) {
+				uf.union(hash(i, j), hash(adjaI, adjaJ));
 			}
 		}
 	}
@@ -57,6 +60,7 @@ public class Percolation {
 	public boolean isFull(int i, int j) {
 		if (i < 1 || i > N || j < 1 || j > N)
 			throw new java.lang.IndexOutOfBoundsException();
+		
 		int k = hash(i, j);
 		return uf.connected(k, 0);
 	}
@@ -72,6 +76,5 @@ public class Percolation {
 
 	// Test client (optional)
 	public static void main(String[] args) {
-		System.out.println("hello");
 	}
 }
