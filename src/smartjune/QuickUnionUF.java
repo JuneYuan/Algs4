@@ -1,79 +1,30 @@
 package smartjune;
 
-import java.util.Arrays;
-
-import edu.princeton.cs.algs4.StdIn;
-import edu.princeton.cs.algs4.StdOut;
-
-public class QuickUnionUF extends UFA {
-	int costOfFind;
+public class QuickUnionUF {
+	private int[] id;
 	
 	public QuickUnionUF(int N) {
-		super(N);
-	}
-
-	@Override
-	public void union(int p, int q) {
-		int pRoot = find(p);
-		int qRoot = find(q);
-		if (pRoot == qRoot)		
-			return; 
-		id[pRoot] = qRoot;
-		count--;
-	}
-
-	@Override
-	public int find(int p) {
-		costOfFind = 1;
-		while (p != id[p]) {
-			p = id[p];
-			costOfFind += 1;
-		}			
-		return p;
+		id = new int[N];
+		for (int i = 0; i < N; i++) {
+			id[i] = i;
+		}
 	}
 	
 	public boolean connected(int p, int q) {
-		int findP = find(p);
-		int t = costOfFind;
-		int findQ = find(q);
-		costOfFind += t;
-		return findP == findQ;
-		
-		// return find(p) == find(q);
+		return root(p) == root(q);
 	}
 	
-	public int unionWithCostReturned(int p, int q) {
-		int pRoot = find(p);
-		int t = costOfFind;
-		
-		int qRoot = find(q);
-		costOfFind += t;
-		
-		if (pRoot == qRoot)		
-			return costOfFind;
-		
-		id[pRoot] = qRoot;
-		count--;
-		
-		return costOfFind;
+	public void union(int p, int q) {
+		int i = root(p);
+		int j = root(q);
+		id[i] = j;
 	}
-
 	
-
-	public static void main(String[] args) {
-		int N = StdIn.readInt();
-		QuickUnionUF uf = new QuickUnionUF(N);
-		while (!StdIn.isEmpty()) {
-			int p = StdIn.readInt();
-			int q = StdIn.readInt();
-			if (!uf.connected(p, q)) {
-				uf.union(p, q);
-				StdOut.println(p + " " + q);
-			}
+	private int root(int i) {
+		while (i != id[i]) {
+			i = id[i];
 		}
-		StdOut.println(uf.count() + " components");
 		
-		StdOut.println(Arrays.toString(uf.id));
+		return i;
 	}
-
 }
