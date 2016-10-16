@@ -46,6 +46,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		swap(k, n - 1);
 		Item item = a[--n];
 		a[n] = null;	// avoid memory loitering
+		
+		if (n < a.length / 4) {
+			resize(a.length / 2);
+		}
 		return item;
 	}
 	

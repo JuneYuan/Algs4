@@ -2,15 +2,13 @@ package assignments.queues;
 
 import java.util.Iterator;
 
-import edu.princeton.cs.algs4.StdRandom;
-
 public class Deque<Item> implements Iterable<Item> {
 	private ListNode first, last; 
 	private int sz;
 	
 	private class ListNode {
-		Item item;
-		ListNode prev, next;
+		private Item item;
+		private ListNode prev, next;
 		
 		public ListNode(Item item, ListNode prev, ListNode next) {
 			this.item = item;
@@ -47,7 +45,8 @@ public class Deque<Item> implements Iterable<Item> {
 		}
 		
 		ListNode next = first.next;
-		ListNode inserted = new ListNode(item, first, next);
+		ListNode inserted = new ListNode(item, null, next);
+		// ListNode inserted = new ListNode(item, first, next);
 		first.next = inserted;
 		if (next != null) {
 			next.prev = inserted;
@@ -65,7 +64,8 @@ public class Deque<Item> implements Iterable<Item> {
 		}
 		
 		ListNode oldlast = last;
-		last = new ListNode(item, oldlast, null);
+		ListNode prev = isEmpty() ? null : oldlast;  // previous of the inserted node (should be null if the deque is empty now)
+		last = new ListNode(item, prev, null);
 		oldlast.next = last;
 		
 		sz++;
@@ -78,8 +78,10 @@ public class Deque<Item> implements Iterable<Item> {
 		}
 		
 		ListNode node = first.next;
-		first.next = first.next.next;
-		if (first.next == null) {
+		first.next = node.next;
+		if (first.next != null) {  // when sz >= 2
+			first.next.prev = null;
+		} else {  // when sz == 1
 			last = first;
 		}
 		sz--;
@@ -92,9 +94,9 @@ public class Deque<Item> implements Iterable<Item> {
 		if (isEmpty()) {
 			throw new java.util.NoSuchElementException();
 		}
-		
+
 		ListNode node = last;
-		last = last.prev;
+		last = (sz == 1) ? first : last.prev;  // 若sz==1，则last.prev是无效的null指针
 		last.next = null;  // avoid memory loitering
 		sz--;
 		
@@ -143,7 +145,7 @@ public class Deque<Item> implements Iterable<Item> {
 		display(deque);
 	}
 	
-	static private void add(Deque<String> deque) {
+	private static void add(Deque<String> deque) {		
 		int cnt = 0;
 		for (int i = 0; i < 3; i++) {
 			char ch = (char) ('A' + cnt++);
@@ -158,8 +160,10 @@ public class Deque<Item> implements Iterable<Item> {
 	}
 	
 	private static void remove(Deque<String> deque) {
-		System.out.println("removed: " + deque.removeFirst());
-		System.out.println("removed: " + deque.removeLast());
+		for (int i = 0; i < 4; i++)
+			System.out.println("removed: " + deque.removeFirst());
+		for (int i = 0; i < 3; i++)
+			System.out.println("removed: " + deque.removeLast());
 	}
 	
 	private static void display(Deque<String> deque) {
