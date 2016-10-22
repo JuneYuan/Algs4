@@ -26,8 +26,7 @@ public class FastCollinearPoints {
 		cnt = 0;
 		
 		for (Point p : points) {
-			// find lines starting with point p
-			System.out.println("Base p: " + p);
+			// Find lines starting with point p
 			helper(p);
 		}
 	}
@@ -46,11 +45,7 @@ public class FastCollinearPoints {
 		}
 	}
 	
-	private void helper(Point p) {
-		if (p.compareTo(new Point(20000, 21000)) == 0) {
-			System.out.print(" ");
-		}
-		
+	private void helper(Point p) {		
 		Point[] copy = Arrays.copyOf(points, n);
 		Arrays.sort(copy, p.slopeOrder());
 
@@ -63,8 +58,9 @@ public class FastCollinearPoints {
         	double slopeP2Curr = p.slopeTo(copy[idx]);
         	double slopeP2Pos = p.slopeTo(copy[pos]);
         	double deltaSlope = Math.abs(slopeP2Curr - slopeP2Pos);
+        	boolean vertical = (slopeP2Pos == Double.POSITIVE_INFINITY && slopeP2Curr == Double.POSITIVE_INFINITY); 
         	boolean drop = false;  // drop when p is not the start of line
-        	while (deltaSlope < Math.pow(10, -5)) {
+        	while (vertical || deltaSlope < Math.pow(10, -5)) {
         		if (p.compareTo(copy[idx]) > 0) {  //WRONGED
         			drop = true;
         		}
@@ -73,27 +69,23 @@ public class FastCollinearPoints {
         		len++;
 
         		if (idx >= n)  break;
-        		
         		slopeP2Curr = p.slopeTo(copy[idx]);
         		deltaSlope = Math.abs(slopeP2Curr - slopeP2Pos);
         	}
         	
         	// finds a line whose length>=4 AND p is the start point
         	if (len >= 3 && !drop) {
-        		// copy[pos..pos+len-1] same slope
+        		// copy[pos..pos+len-1] have the same slope
             	Point end = copy[pos];
-System.out.print("line: " + p + "->");
         		for (int i = pos; i < pos + len; i++) {
-System.out.print(copy[i] + "->");
         			if (end.compareTo(copy[i]) < 0) {
         				end = copy[i];
         			}
         		}
-System.out.println();
     			lines[cnt++] = new LineSegment(p, end);
         	}
         	
-        	// for next line segment
+        	// update for next line segment
         	pos += len;
         	len = 0;
         }
@@ -133,7 +125,6 @@ System.out.println();
 			segment.draw();
 		}
 		StdDraw.show();
-System.out.println("done");
 	}
 
 }
