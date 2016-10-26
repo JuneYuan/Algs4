@@ -32,22 +32,24 @@ public class BruteCollinearPoints {
 	private int cnt;	// actual lines count
 
 	public BruteCollinearPoints(Point[] points) {
-		// Corner cases		
-		checkForNullOrDuplicates(points);
-		
-		// Iterate through all combinations of 4 points (N choose 4) and test
 		n = points.length;
 		m = n * (n - 1) / 2;
 		lines = new LineSegment[m];
 		cnt = 0;
 		
-		Arrays.sort(points);
+		Point[] copy = Arrays.copyOf(points, points.length);		
+		// Corner cases
+		checkForNullOrDuplicates(copy);
+		// Iterate through all combinations of 4 points (N choose 4) and test
+		Arrays.sort(copy);
 		for (int i = 0; i < n; i++) {
 			for (int j = i + 1; j < n; j++) {
 				for (int k = j + 1; k < n; k++) {
-					for (int p = k + 1; p < n; p++) {
-						if (areCollinear(points[i], points[j], points[k], points[p])) {
-							lines[cnt++] = new LineSegment(points[i], points[p]);
+					for (int t = k + 1; t < n; t++) {
+						if (areCollinear(copy[i], copy[j], copy[k], copy[t])) {
+							lines[cnt++] = new LineSegment(copy[i], copy[t]);
+// System.out.println(copy[i] + "->" + copy[j] + "->" + copy[k] + "->" + copy[t]);
+							break;  // the problem spec ensures no more than 4 points in a line
 						}
 					}
 				}
@@ -65,15 +67,21 @@ public class BruteCollinearPoints {
 				}
 			}			
 		} catch (java.lang.NullPointerException e) {
-			throw e;
+			throw new java.lang.NullPointerException();
 		}
 	}
 	
 	private boolean areCollinear(Point p0, Point p1, Point p2, Point p3) {
-		double delta1 = Math.abs(p2.slopeTo(p0) - p1.slopeTo(p0));
-		double delta2 = Math.abs(p3.slopeTo(p0) - p1.slopeTo(p0));		
+		double slope1 = p1.slopeTo(p0);
+		double slope2 = p2.slopeTo(p0);
+		double slope3 = p3.slopeTo(p0);
+		boolean verticalCollinear = (slope1 == Double.POSITIVE_INFINITY
+				&& slope2 == Double.POSITIVE_INFINITY
+				&& slope3 == Double.POSITIVE_INFINITY);
+		boolean nonverticalCollinear = (Math.abs(p2.slopeTo(p0) - p1.slopeTo(p0)) < Math.pow(10, -5)
+				&& Math.abs(p3.slopeTo(p0) - p1.slopeTo(p0)) < Math.pow(10, -5));
 		
-		return (delta1 < Math.pow(10, -5) && delta2 < Math.pow(10, -5));
+		return (verticalCollinear || nonverticalCollinear);
 	}
 	
 	public int numberOfSegments() {

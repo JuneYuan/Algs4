@@ -139,6 +139,12 @@ public class Point implements Comparable<Point> {
      */
     public static void main(String[] args) {
         /* YOUR CODE HERE */
+/*    	
+    	System.out.println("+∞ + +∞ = " + (Double.POSITIVE_INFINITY + Double.POSITIVE_INFINITY));  // +∞
+    	System.out.println("+∞ - +∞ = " + (Double.POSITIVE_INFINITY - Double.POSITIVE_INFINITY));  // NaN
+    	System.out.println("-∞ + -∞ = " + (Double.NEGATIVE_INFINITY + Double.NEGATIVE_INFINITY));  // -∞
+    	System.out.println("-∞ - -∞ = " + (Double.NEGATIVE_INFINITY - Double.NEGATIVE_INFINITY));  // NaN
+*/
     	
 		// Read the n points from standard input
 		int n = StdIn.readInt();

@@ -7,7 +7,6 @@ import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 public class FastCollinearPoints {
-	private Point[] points;
 	private LineSegment[] lines;	// all lines patterns that recognized
 	private int n;		// points number
 	private int m;		// lines number (at most)
@@ -15,38 +14,36 @@ public class FastCollinearPoints {
 	
 	// finds all line segments containing 4 or more points
 	public FastCollinearPoints(Point[] points) {
-		this.points = points;
-		// Corner cases		
-		checkForNullOrDuplicates(points);
-		
-		// Main task
 		n = points.length;
 		m = n * (n - 1) / 2;
 		lines = new LineSegment[m];
 		cnt = 0;
 		
+		Point[] copy = Arrays.copyOf(points, points.length);
+		// Corner cases		
+		checkForNullOrDuplicates(copy);
+		// Main task
 		for (Point p : points) {
 			// Find lines starting with point p
-			helper(p);
+			helper(copy, p);
 		}
 	}
 
-	private void checkForNullOrDuplicates(Point[] points) {
-		if (points == null)  throw new java.lang.NullPointerException();
+	private void checkForNullOrDuplicates(Point[] copy) {
+		if (copy == null)  throw new java.lang.NullPointerException();
 		try {
-			Arrays.sort(points);
+			Arrays.sort(copy);
 			for (int i = 0; i < n - 1; i++) {
-				if (points[i].compareTo(points[i + 1]) == 0) {
+				if (copy[i].compareTo(copy[i + 1]) == 0) {
 					throw new java.lang.IllegalArgumentException();
 				}
 			}
 		} catch (java.lang.NullPointerException e) {
-			throw e;
+			throw new java.lang.NullPointerException();
 		}
 	}
 	
-	private void helper(Point p) {		
-		Point[] copy = Arrays.copyOf(points, n);
+	private void helper(Point[] copy, Point p) {		
 		Arrays.sort(copy, p.slopeOrder());
 
         int idx = 1;  // index of slopes: iterating through 1..n-1
@@ -61,7 +58,7 @@ public class FastCollinearPoints {
         	boolean vertical = (slopeP2Pos == Double.POSITIVE_INFINITY && slopeP2Curr == Double.POSITIVE_INFINITY); 
         	boolean drop = false;  // drop when p is not the start of line
         	while (vertical || deltaSlope < Math.pow(10, -5)) {
-        		if (p.compareTo(copy[idx]) > 0) {  //WRONGED
+        		if (!drop && p.compareTo(copy[idx]) > 0) {  //WRONGED
         			drop = true;
         		}
         		
