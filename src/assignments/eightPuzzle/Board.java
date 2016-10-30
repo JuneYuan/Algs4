@@ -86,14 +86,18 @@ public class Board {
 	
 	// a board that is obtained by exchanging any pair of blocks
 	public Board twin() {
+		if (n < 2)  return new Board(copy);
+
 		int[][] twin = new int[n][n];
 		for (int i = 0; i < n; i++) {
 			System.arraycopy(copy[i], 0, twin[i], 0, n);
 		}
 		
-		twin[0][0] = copy[n - 1][n - 1];
-		twin[n - 1][n - 1] = copy[0][0];
-		// Or: swap(twin, 0, 0, n - 1, n - 1);
+		int x1 = 0, y1 = 0;
+		int x2 = n - 1, y2 = n - 1;
+		if (x1 == blankX && y1 == blankY)  y1++;
+		if (x2 == blankX && y2 == blankY)  y2--;
+		swap(twin, x1, y1, x2, y2);
 		
 		return new Board(twin);
 	}
@@ -120,10 +124,11 @@ public class Board {
 		
 		int[][] directions = new int[][]{
 			{-1, 0}, {1, 0}, {0, -1}, {0, 1}
-		};
+		};  // up, down, left, right
+
 		for (int[] direc : directions) {
 			Board board = new Board(this);
-			boolean success = swap(board.copy, blankX, blankY, blankX + direc[0], blankY + direc[1]);
+			boolean success = swap(board.copy, board.blankX, board.blankY, board.blankX + direc[0], board.blankY + direc[1]);
 			if (success) {
 				result.enqueue(board);
 			}
@@ -158,9 +163,9 @@ public class Board {
 	// unit test
 	public static void main(String[] args) {
 		int[][] blocks = new int[][] {
-			{8, 1, 3},
-			{4, 0, 2},
-			{7, 6, 5}
+			{0, 1, 3},
+			{4, 2, 5},
+			{7, 8, 6}
 		};
 		Board board = new Board(blocks);
 		System.out.println("initial--");
