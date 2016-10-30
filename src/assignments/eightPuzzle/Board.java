@@ -6,7 +6,6 @@ import edu.princeton.cs.algs4.StdOut;
 public class Board {
 	private final int n;		// board dimension
 	private int[][] copy;		// deep copy of blocks[][]
-	private int[][] goal;		// the goal
 	private int blankX, blankY;	// index of the blank square
 
 	// construct a board from a n-by-n array of blocks
@@ -16,14 +15,11 @@ public class Board {
 		n = blocks.length;
 
 		copy = new int[n][n];
-		goal = new int[n][n];
 		for (int i = 0; i < n; i++) {
 			copy[i] = new int[n];
-			goal[i] = new int[n];
 			
 			for (int j = 0; j < n; j++) {
 				copy[i][j] = blocks[i][j];
-				goal[i][j] = (i * n + j + 1) % (n * n);
 				
 				if (blocks[i][j] == 0) {
 					blankX = i;
@@ -47,9 +43,12 @@ public class Board {
 	public int hamming() {
 		int cnt = 0;
 		
-		for (int i = 0; i < n; i++) 
-			for (int j = 0; j < n; j++)
-				if (copy[i][j] != 0 && copy[i][j] != goal[i][j])  cnt++;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				int ref = (i * n + j + 1) % (n * n);
+				if (copy[i][j] != 0 && copy[i][j] != ref)  cnt++;
+			}
+		}
 		
 		return cnt;
 	}
@@ -109,6 +108,9 @@ public class Board {
 		if (this.getClass() != y.getClass())  return false;
 		
 		Board that = (Board) y;
+		// checks that individual entries of array are equal!
+		if (this.dimension() != that.dimension())  return false;
+		
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (this.copy[i][j] != that.copy[i][j])  return false;
@@ -163,19 +165,15 @@ public class Board {
 	// unit test
 	public static void main(String[] args) {
 		int[][] blocks = new int[][] {
-			{0, 1, 3},
-			{4, 2, 5},
-			{7, 8, 6}
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 0}
 		};
 		Board board = new Board(blocks);
 		System.out.println("initial--");
 		StdOut.println(board);
-		
-		System.out.println("goal--");
-		System.out.println(new Board(board.goal));
 
 		System.out.println("is board the goal? -- " + board.isGoal());
-		System.out.println("is board.goal the goal? -- " + new Board(board.goal).isGoal());
 		
 		System.out.println("\ntwin--");
 		System.out.println(board.twin());
@@ -187,4 +185,5 @@ public class Board {
 		System.out.println("Hamming = " + board.hamming());
 		System.out.println("\nManhattan = " + board.manhattan());		
 	}
+}
 }

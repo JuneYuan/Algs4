@@ -44,7 +44,7 @@ public class Solver {
 		
 		if (initial.isGoal()) {
 			solvable = true;
-			goalNode = new Node(null, 0, null);
+			goalNode = new Node(initial, 0, null);
 			return;
 		}
 		if (initial.twin().isGoal()) {
@@ -111,9 +111,9 @@ public class Solver {
 
 	// sequence of boards in a shortest solution; null if unsolvable
 	public Iterable<Board> solution() {
-		Queue<Board> result = new Queue<>();
-		if (goalNode == null)  return result;
+		if (!solvable)  return null;
 
+		Queue<Board> result = new Queue<>();
 		Stack<Node> stack = new Stack<>();
 		// backtracing from the goalNode, resulting in a stack
 		Node tmp = goalNode;
