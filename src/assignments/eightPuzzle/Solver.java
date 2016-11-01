@@ -11,7 +11,7 @@ public class Solver {
 	private Node twinNode;		 // the initial Node modified by swapping a pair of blocks
 	private Node goalNode;       // the goal Node, used to backtrace the solution sequence
 	private boolean solvable;    // is the initial board solvable?
-	private boolean quit;        // helps quit the search loop
+	private boolean quit;        // helps quit the (lockstep) search loop
 	private MinPQ<Node> pqInit;  // priority queue for solving the initial board
 	private MinPQ<Node> pqTwin;  // priority queue for solving the twin board pair of blocks
 	
@@ -42,6 +42,7 @@ public class Solver {
 	public Solver(Board initial) {
 		if (initial == null)  throw new java.lang.NullPointerException();
 		
+		// if initial is already the goal, or a twin of the goal, conclude instantly
 		if (initial.isGoal()) {
 			solvable = true;
 			goalNode = new Node(initial, 0, null);
@@ -52,6 +53,8 @@ public class Solver {
 			return;
 		}
 
+		// create priority queues for the initial board and the twin board, respectively
+		// then apply the A* algorithm to above two boards in lockstep
 		initNode = new Node(initial, 0, null);
 		pqInit = new MinPQ<>();
 		pqInit.insert(initNode);
@@ -71,32 +74,29 @@ public class Solver {
 	
 	// search the possible next node starting from pq.min()
 	private void oneStepSearch(MinPQ<Node> pq, int flag) {
-		Node min = pq.min();
-
+		Node min = pq.delMin();
+		
+		// the dequeued search node corresponds to a goal board
+		if (min.board.isGoal()) {
+			if (flag == 0) {
+				solvable = true;
+				goalNode = min;
+			} else {
+				solvable = false;
+			}
+			quit = true;
+		}
+		
+		// insert onto the priority queue the neighboring search nodes
 		Iterable<Board> neighbors = min.board.neighbors();
-
-// System.out.println(" min: " + min.board.hamming() + " + " + min.moves);		
 		for (Board neighbor : neighbors) {
 			Node node = new Node(neighbor, min.moves + 1, min);
 			
-			if (neighbor.isGoal()) {
-				if (flag == 0) {
-					solvable = true;
-					goalNode = node;
-				} else {
-					solvable = false;
-				}
-				quit = true;
-			}
-			
+			// filter the duplicates: min's neighbor that repeats min's previous
 			if (min.prev == null || !neighbor.equals(min.prev.board)) {
 				pq.insert(node);
 			}
-			
-// System.out.println("node: " + node.board.hamming() + " + " + node.moves);
 		}
-		
-		pq.delMin();
 	}
 		
 	// is the initial board solvable?

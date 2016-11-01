@@ -5,7 +5,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Board {
 	private final int n;		// board dimension
-	private int[][] copy;		// deep copy of blocks[][]
+	private final int[][] copy;		// deep copy of blocks[][]
 	private int blankX, blankY;	// index of the blank square
 
 	// construct a board from a n-by-n array of blocks
@@ -163,7 +163,7 @@ public class Board {
 	}
 	
 	// unit test
-	public static void main(String[] args) {
+	public static void main(String[] args) {	
 		int[][] blocks = new int[][] {
 			{1, 2, 3},
 			{4, 5, 6},
@@ -185,5 +185,4 @@ public class Board {
 		System.out.println("Hamming = " + board.hamming());
 		System.out.println("\nManhattan = " + board.manhattan());		
 	}
-}
 }
