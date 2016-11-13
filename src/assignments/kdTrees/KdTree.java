@@ -55,7 +55,14 @@ public class KdTree {
 		TreeNode node = root;
 		while (true) {
 			TreeNode child = sameSideChildOfNodeWithP(node, p);
-			if (child.point == null) {
+			
+			if (child == null) {  // inserting the first node (root)
+				RectHV rect = new RectHV(0, 0, 1, 1);
+				root = new TreeNode(p, rect, null, null, true);
+				break;
+			}
+			
+			if (child.point == null) {  // inserting the following node
 				child.point = p;
 				break;
 			}
@@ -64,6 +71,32 @@ public class KdTree {
 		}
 		allPoints.add(p);
 		size++;
+	}
+	
+	private TreeNode sameSideChildOfNodeWithP(TreeNode node, Point2D p) {
+		if (node == null)  return null;
+		
+		TreeNode child;
+		if (node.isVertical) {
+			child = (p.x() < node.point.x()) ? node.left : node.right;
+		} else {
+			child = (p.y() < node.point.y()) ? node.left : node.right;
+		}
+		if (child != null)  return child;
+
+		// if child doesn't exist, we fill it with a node of proper rectangle and NULL point 
+		double xmin = node.rect.xmin();
+		double ymin = node.rect.ymin();
+		double xmax = node.rect.xmax();
+		double ymax = node.rect.ymax();
+		if (node.isVertical && p.x() < node.point.x())    xmax = node.point.x();
+		if (node.isVertical && p.x() >= node.point.x())   xmin = node.point.x();
+		if (!node.isVertical && p.y() < node.point.y())   ymax = node.point.y();
+		if (!node.isVertical && p.y() >= node.point.y())  ymin = node.point.y();
+		RectHV rect = new RectHV(xmin, ymin, xmax, ymax);
+		child = new TreeNode(null, rect, null, null, !node.isVertical);
+		
+		return child;
 	}
 	
 	// Does the set contain point p?
@@ -168,38 +201,14 @@ public class KdTree {
 			result = node.point;
 		}
 		
-		TreeNode sameSide = sameSideChildOfNodeWithP(node, p);
-		TreeNode diffSide = (sameSide == node.left) ? node.right : node.left;
-		dfsNeighbor(sameSide, p, result);
-		if (diffSide != null && point2Rectangle(p, diffSide.rect) < p.distanceTo(result)) {
-			dfsNeighbor(diffSide, p, result);
+		TreeNode sameSideChild = sameSideChildOfNodeWithP(node, p);
+		TreeNode diffSideChild = (sameSideChild == node.left) ? node.right : node.left;
+		dfsNeighbor(sameSideChild, p, result);
+		if (diffSideChild != null && point2Rectangle(p, diffSideChild.rect) < p.distanceTo(result)) {
+			dfsNeighbor(diffSideChild, p, result);
 		}
 	}
-	
-	private TreeNode sameSideChildOfNodeWithP(TreeNode node, Point2D p) {
-		TreeNode child;
-		if (node.isVertical) {
-			child = (p.x() < node.point.x()) ? node.left : node.right;
-		} else {
-			child = (p.y() < node.point.y()) ? node.left : node.right;
-		}
-		if (child != null)  return child;
 
-		// if child doesn't exist, we fill it with a node of proper rectangle and NULL point 
-		double xmin = node.rect.xmin();
-		double ymin = node.rect.ymin();
-		double xmax = node.rect.xmax();
-		double ymax = node.rect.ymax();
-		if (node.isVertical && p.x() < node.point.x())    xmax = node.point.x();
-		if (node.isVertical && p.x() >= node.point.x())   xmin = node.point.x();
-		if (!node.isVertical && p.y() < node.point.y())   ymax = node.point.y();
-		if (!node.isVertical && p.y() >= node.point.y())  ymin = node.point.y();
-		RectHV rect = new RectHV(xmin, ymin, xmax, ymax);
-		child = new TreeNode(null, rect, null, null, !node.isVertical);
-		
-		return child;
-	}
-	
 	// Unit testing (optional)
 	public static void main(String[] args) {
 		
