@@ -48,6 +48,8 @@ public class KdTree {
 	
 	// Add the point to the set (if it is not already in the set)
 	public void insert(Point2D p){
+		if (p == null)  throw new java.lang.NullPointerException();
+		
 		if (contains(p))  return;
 		
 		TreeNode node = root;
@@ -60,13 +62,13 @@ public class KdTree {
 			
 			node = child;
 		}
-		
 		allPoints.add(p);
 		size++;
 	}
 	
 	// Does the set contain point p?
 	public boolean contains(Point2D p) {
+		if (p == null)  throw new java.lang.NullPointerException();
 		return allPoints.contains(p);
 	}
 	
@@ -77,6 +79,7 @@ public class KdTree {
 	
 	// All points that are inside the rectangle
 	public Iterable<Point2D> range(RectHV rect) {
+		if (rect == null)  throw new java.lang.NullPointerException();
 		List<Point2D> results = new ArrayList<>();
 		dfsRange(root, rect, results);
 		
@@ -150,9 +153,10 @@ public class KdTree {
 	
 	// A nearest neighbor in the set to point p; null if the set if empty
 	public Point2D nearest(Point2D p) {
+		if (p == null)  throw new java.lang.NullPointerException();
+		
 		Point2D result = root.point;
 		dfsNeighbor(root, p, result);
-		
 		return result;
 	}
 	

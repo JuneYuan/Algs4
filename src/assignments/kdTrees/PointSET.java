@@ -27,11 +27,13 @@ public class PointSET {
 	
 	// Add the point to the set (if it is not already in the set)
 	public void insert(Point2D p){
+		if (p == null)  throw new java.lang.NullPointerException();
 		allPoints.add(p);
 	}
 	
 	// Does the set contain point p?
 	public boolean contains(Point2D p) {
+		if (p == null)  throw new java.lang.NullPointerException();
 		return allPoints.contains(p);
 	}
 	
@@ -42,6 +44,8 @@ public class PointSET {
 	
 	// All points that are inside the rectangle
 	public Iterable<Point2D> range(RectHV rect) {
+		if (rect == null)  throw new java.lang.NullPointerException();
+		
 		List<Point2D> results = new ArrayList<>();
 		for (Point2D p : allPoints) {
 			if (point2Rectangle(p, rect) < Math.pow(10, -5)) {
@@ -52,8 +56,6 @@ public class PointSET {
 	}
 	
 	private double point2Rectangle(Point2D p, RectHV rect) {
-		if (rect == null)  throw new java.lang.IllegalArgumentException("rect is null!");
-		
 		boolean pInXrange = (p.x() >= rect.xmin() && p.x() <= rect.xmax());
 		boolean pInYrange = (p.y() >= rect.ymin() && p.y() <= rect.ymax());
 		
@@ -85,6 +87,8 @@ public class PointSET {
 
 	// A nearest neighbor in the set to point p; null if the set if empty
 	public Point2D nearest(Point2D p) {
+		if (p == null)  throw new java.lang.NullPointerException();
+		
 		Point2D result = null;
 		for (Point2D q : allPoints) {
 			if (result == null || p.distanceTo(q) < p.distanceTo(result)) {
