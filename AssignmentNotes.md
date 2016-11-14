@@ -176,3 +176,49 @@ goalNode = new Node(null, 0, null);
 ```
 goalNode = new Node(initial, 0, null);
 ```
+
+
+
+
+
+### Week5 Kd-Trees
+
+### 一、问题
+
+解决二维平面上的“range search”和“nearest neighbor”问题。
+
+> 
+**range search**: find all of the points contained in a query rectangle.
+**nearest neighbor search**: find a closest point to a query point.
+
+#### 二、思路
+
++ Brute-force
+
+使用一颗红黑树来存储平面内所有的点（题目说了其实是在一个 `unit square` 内的点），对于上述两个问题，都可以通过遍历这个红黑树对应的 `SET` 来实现，时间复杂度为 O(N).
+
++ 2d-tree
+
+> A 2d-tree is a generalization of a BST to two-dimensional keys. The idea is to build a BST with points in the nodes, using the x- and y- coordinates of the points as keys in strictly alternating sequence.
+
+> The prime advantage of a 2d-tree over a BST is that it supports efficient implementation of range search and nearest neighbor search. Each node corresponds to an axis-aligned rectangle in the unit square, which encloses all of the points in its subtree. The root corresponds to the unit square; the left and right children of the root corresponds to the two rectangles split by the x-coordinate of the point at the root; and so forth.
+
+> 
+**range search.** To find all points contained in a given query rectangle, start at the root and recursively search for points in *both* subtrees using the following *prunning rule*: if the query rectangle does not intersect the rectangle corresponding to a node, there is no need to explore that node (or its subtrees). A subtree is searched only if it might contain a point contained in the query rectangle.
+
+> 
+**nearest neighbor search.** To find a closest point to a given query point, start at the root and recursively search in *both* subtrees using the following *prunning rule*: if the closest point discovered so far is closer than the distance between the query point and the rectangle corresponding to a node, there is no need to explore that node (or its subtrees). That is, a node is searched only if it might contain a point that is closer than the best one found so far.
+The effectiveness of the prunning rule depends on quickly finding a nearby point. To do this, organize your recursive method so that when there are two possible subtrees to go down, you always choose *the subtree that is on the same side of the splitting line as the query point* as the first subtree to explore -- the closest point found while exploring the first subtree may enable prunning of the second subtree.
+
+> 
+**insert.**
+
+
+> 
+**draw.**
+
+ 1. **range search 补充**
+跟 Brute-force 对比着来想—— Brute-force 要求一个 query rectangle 包围住的点，显然可以拿每个点逐一进行检测，看它在不在矩形的内部。2d-tree 稍微高明些，它不是无脑地去检测所有点，而是将 unit square 划分成若干个矩形块，与 query rectangle 相交的那些块，里边的点才有可能是要找的答案，就要对它们进行检测；而与 query rectangle 根本都不相交的矩形块，里边的点绝无可能是我们要的答案，所以直接忽略掉。  
+再明确一些，从二维坐标平面（unit square）跟 kd-tree 的对应关系来看，树上的叶子结点，对应了图中那些被分到不能再分的小矩形块；树上的每个节点，同时代表着一个二维点和该点所分割开的矩形。 `range search` 的过程就是：从根节点出发，一路向下找出所有与 query rectangle 有交集的那些节点（对应的矩形），看该节点对应的二维点，是否在 query rectangle 内。
+ 1. **nearest 补充**
+
