@@ -1,16 +1,17 @@
 package assignments.kdTrees;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.SET;
+import edu.princeton.cs.algs4.StdDraw;
 
 public class KdTree {
 	private TreeNode root;
 	private int size;
-	private HashSet<Point2D> allPoints;
+	private SET<Point2D> allPoints;
 
 	private static class TreeNode {
 		Point2D point;
@@ -33,7 +34,7 @@ public class KdTree {
 	public KdTree() {
 		root = null;
 		size = 0;
-		allPoints = new HashSet<>();
+		allPoints = new SET<>();
 	}
 	
 	// Is the set empty?
@@ -56,47 +57,64 @@ public class KdTree {
 		while (true) {
 			TreeNode child = sameSideChildOfNodeWithP(node, p);
 			
-			if (child == null) {  // inserting the first node (root)
+			if (child == null) {  // insert (the first node, i.e. root)
 				RectHV rect = new RectHV(0, 0, 1, 1);
 				root = new TreeNode(p, rect, null, null, true);
 				break;
 			}
 			
-			if (child.point == null) {  // inserting the following node
+			if (child.point == null) {  // insert (some node below the root)
 				child.point = p;
 				break;
 			}
 			
-			node = child;
+			node = child;		// going to the insert position
 		}
 		allPoints.add(p);
 		size++;
 	}
 	
+	// return the child of node that is on the same side with p
 	private TreeNode sameSideChildOfNodeWithP(TreeNode node, Point2D p) {
 		if (node == null)  return null;
 		
 		TreeNode child;
-		if (node.isVertical) {
-			child = (p.x() < node.point.x()) ? node.left : node.right;
+		if (less(p, node)) {
+			child = node.left;
 		} else {
-			child = (p.y() < node.point.y()) ? node.left : node.right;
+			child = node.right;
 		}
 		if (child != null)  return child;
 
-		// if child doesn't exist, we fill it with a node of proper rectangle and NULL point 
+		// if child doesn't exist, we fill it with a node of proper rectangle and NULL point
+		RectHV rect = sameSideChildRectangle(p, node);
+		child = new TreeNode(null, rect, null, null, !node.isVertical);
+		if (less(p, node)) {
+			node.left = child;
+		} else {
+			node.right = child;
+		}
+		return child;
+	}
+	
+	private boolean less(Point2D p, TreeNode node) {
+		return ((node.isVertical && p.x() < node.point.x()) 
+				|| (!node.isVertical && p.y() < node.point.y()));
+	}
+	
+	private RectHV sameSideChildRectangle(Point2D p, TreeNode node) {
+		boolean xIsLess = p.x() < node.point.x();
+		boolean yIsLess = p.y() < node.point.y(); 
 		double xmin = node.rect.xmin();
 		double ymin = node.rect.ymin();
 		double xmax = node.rect.xmax();
 		double ymax = node.rect.ymax();
-		if (node.isVertical && p.x() < node.point.x())    xmax = node.point.x();
-		if (node.isVertical && p.x() >= node.point.x())   xmin = node.point.x();
-		if (!node.isVertical && p.y() < node.point.y())   ymax = node.point.y();
-		if (!node.isVertical && p.y() >= node.point.y())  ymin = node.point.y();
-		RectHV rect = new RectHV(xmin, ymin, xmax, ymax);
-		child = new TreeNode(null, rect, null, null, !node.isVertical);
+		if (node.isVertical && xIsLess)   xmax = node.point.x();
+		if (node.isVertical && !xIsLess)  xmin = node.point.x();
+		if (!node.isVertical && yIsLess)  ymax = node.point.y();
+		if (!node.isVertical && !yIsLess) ymin = node.point.y();
 		
-		return child;
+		return new RectHV(xmin, ymin, xmax, ymax);
 	}
 	
 	// Does the set contain point p?
@@ -107,7 +125,26 @@ public class KdTree {
 	
 	// Draw all points to standard draw
 	public void draw() {
+		preOrder(root);
+	}
+	
+	private void preOrder(TreeNode node) {
+		if (node == null || node.point == null)  return;
+		draw(node);
+		preOrder(node.left);
+		preOrder(node.right);
+	}
+	
+	private void draw(TreeNode node) {
+		node.point.draw();
 		
+		if (node.isVertical) {
+			StdDraw.setPenColor(StdDraw.RED);
+			StdDraw.line(node.point.x(), node.rect.ymin(), node.point.x(), node.rect.ymax());
+		} else {
+			StdDraw.setPenColor(StdDraw.BLUE);
+			StdDraw.line(node.rect.xmin(), node.point.y(), node.rect.xmax(), node.point.y());
+		}
 	}
 	
 	// All points that are inside the rectangle
@@ -119,16 +156,16 @@ public class KdTree {
 		return results;
 	}
 	
-	private void dfsRange(TreeNode node, RectHV queryRect, List<Point2D> results) {		
+	private void dfsRange(TreeNode node, RectHV query, List<Point2D> results) {		
 		if (node == null)  return;
 		
-		collect(node, queryRect, results);
+		collect(node, query, results);
 		
-		if (intersect(node.left.rect, queryRect)) {
-			dfsRange(node.left, queryRect, results);
+		if (node.left != null && intersect(node.left.rect, query)) {
+			dfsRange(node.left, query, results);
 		}
-		if (intersect(node.right.rect, queryRect)) {
-			dfsRange(node.right, queryRect, results);
+		if (node.right != null && intersect(node.right.rect, query)) {
+			dfsRange(node.right, query, results);
 		}
 	}
 	
@@ -145,9 +182,9 @@ public class KdTree {
 		return true;
 	}
 	
-	private void collect(TreeNode node, RectHV rect, List<Point2D> results) {
-		double distance = point2Rectangle(node.point, rect);
-		if (distance < Math.pow(10, -5)) {
+	private void collect(TreeNode node, RectHV query, List<Point2D> results) {
+		double distance = point2Rectangle(node.point, query);
+		if (distance < Math.pow(10, -7)) {
 			results.add(node.point);
 		}
 	}
@@ -173,12 +210,6 @@ public class KdTree {
 			double a2 = p.distanceTo(new Point2D(rect.xmax(), rect.ymin()));
 			double b1 = p.distanceTo(new Point2D(rect.xmin(), rect.ymax()));
 			double b2 = p.distanceTo(new Point2D(rect.xmax(), rect.ymax()));
-			/*
-			double a1 = Math.pow(p.x() - rect.xmin(), 2) + Math.pow(p.y() - rect.ymin(), 2);
-			double a2 = Math.pow(p.x() - rect.xmax(), 2) + Math.pow(p.y() - rect.ymin(), 2);
-			double b1 = Math.pow(p.x() - rect.xmin(), 2) + Math.pow(p.y() - rect.ymax(), 2);
-			double b2 = Math.pow(p.x() - rect.xmax(), 2) + Math.pow(p.y() - rect.ymax(), 2);
-			*/
 			double answer = Math.min(Math.min(a1, a2), Math.min(b1, b2));
 			return answer;
 		}
@@ -202,10 +233,10 @@ public class KdTree {
 		}
 		
 		TreeNode sameSideChild = sameSideChildOfNodeWithP(node, p);
-		TreeNode diffSideChild = (sameSideChild == node.left) ? node.right : node.left;
+		TreeNode diffSide = (sameSideChild == node.left) ? node.right : node.left;
 		dfsNeighbor(sameSideChild, p, result);
-		if (diffSideChild != null && point2Rectangle(p, diffSideChild.rect) < p.distanceTo(result)) {
-			dfsNeighbor(diffSideChild, p, result);
+		if (diffSide != null && point2Rectangle(p, diffSide.rect) < p.distanceTo(result)) {
+			dfsNeighbor(diffSide, p, result);
 		}
 	}
 

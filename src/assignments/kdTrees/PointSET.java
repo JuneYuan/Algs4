@@ -8,7 +8,7 @@ import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.SET;
 
 public class PointSET {
-	SET<Point2D> allPoints;
+	private SET<Point2D> allPoints;
 
 	// Construct an empty set of points
 	public PointSET() {
@@ -39,7 +39,9 @@ public class PointSET {
 	
 	// Draw all points to standard draw
 	public void draw() {
-		
+		for (Point2D point : allPoints) {
+			point.draw();
+		}
 	}
 	
 	// All points that are inside the rectangle
@@ -48,7 +50,7 @@ public class PointSET {
 		
 		List<Point2D> results = new ArrayList<>();
 		for (Point2D p : allPoints) {
-			if (point2Rectangle(p, rect) < Math.pow(10, -5)) {
+			if (point2Rectangle(p, rect) < Math.pow(10, -7)) {
 				results.add(p);
 			}
 		}
