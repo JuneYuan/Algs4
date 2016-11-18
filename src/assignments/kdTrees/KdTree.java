@@ -150,9 +150,9 @@ public class KdTree {
 	// All points that are inside the rectangle
 	public Iterable<Point2D> range(RectHV rect) {
 		if (rect == null)  throw new java.lang.NullPointerException();
+		
 		List<Point2D> results = new ArrayList<>();
 		dfsRange(root, rect, results);
-		
 		return results;
 	}
 	
@@ -177,20 +177,23 @@ public class KdTree {
 		double right = Math.min(rect1.xmax(), rect2.xmax());
 		double top = Math.min(rect1.ymax(), rect2.ymax());
 		double bottom = Math.max(rect1.ymin(), rect2.ymin());
-		if (right <= left || top <= bottom)  return false;
+		if (right < left || top < bottom)  return false;
 		
 		return true;
 	}
 	
 	private void collect(TreeNode node, RectHV query, List<Point2D> results) {
-		double distance = point2Rectangle(node.point, query);
+		if (node.point == null)  return;
+		
+		// double distance = point2Rectangle(node.point, query);
+		double distance = query.distanceTo(node.point);
 		if (distance < Math.pow(10, -7)) {
 			results.add(node.point);
 		}
 	}
 	
 	private double point2Rectangle(Point2D p, RectHV rect) {
-		if (rect == null)  throw new java.lang.IllegalArgumentException("rect is null!");
+		if (p == null || rect == null)  throw new java.lang.IllegalArgumentException("point or rect is null!");
 		
 		boolean pInXrange = (p.x() >= rect.xmin() && p.x() <= rect.xmax());
 		boolean pInYrange = (p.y() >= rect.ymin() && p.y() <= rect.ymax());
@@ -218,6 +221,7 @@ public class KdTree {
 	// A nearest neighbor in the set to point p; null if the set if empty
 	public Point2D nearest(Point2D p) {
 		if (p == null)  throw new java.lang.NullPointerException();
+		if (size() == 0)  return null;
 		
 		Point2D result = root.point;
 		dfsNeighbor(root, p, result);
@@ -228,20 +232,25 @@ public class KdTree {
 		if (node == null || node.point == null)  return;
 		
 		double dist = p.distanceTo(node.point);
-		if (dist < p.distanceTo(result)) {
+		double currMin = p.distanceTo(result);
+		if (dist < currMin) {
 			result = node.point;
 		}
 		
 		TreeNode sameSideChild = sameSideChildOfNodeWithP(node, p);
-		TreeNode diffSide = (sameSideChild == node.left) ? node.right : node.left;
 		dfsNeighbor(sameSideChild, p, result);
-		if (diffSide != null && point2Rectangle(p, diffSide.rect) < p.distanceTo(result)) {
-			dfsNeighbor(diffSide, p, result);
+		
+		TreeNode diffSideChild = (sameSideChild == node.left) ? node.right : node.left;
+		if (diffSideChild != null && point2Rectangle(p, diffSideChild.rect) < currMin) {
+			dfsNeighbor(diffSideChild, p, result);
 		}
 	}
 
 	// Unit testing (optional)
 	public static void main(String[] args) {
-		
+		Point2D p = new Point2D(0.6565, 0.7553);
+		RectHV rect = new RectHV(0.5578, 0.229, 0.7079, 0.7553);
+		double dist = new KdTree().point2Rectangle(p, rect);
+		System.out.println(dist);
 	}
 }
